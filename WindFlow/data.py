@@ -20,14 +20,10 @@ def timestampToDate(timestamp):
     print (type(dt_obj))
     return dt_obj
 
-def get_data(fechaInicio, horaInicio, fechaFin, horaFin, variable, estacion, frecuencia):
-    '''
-    Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
-    hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
-    '''
+def get_data(fechaInicio, fechaFin, variable, estacion, frecuencia):
     url = f"https://airviro.r9.cl/api/v1/domain/CODELCO/timeserie/{estacion}{frecuencia}M{variable}010/{fechaInicio}/{fechaFin}/"
-    tsi = dateToTimestamp(fechaInicio, horaInicio)
-    tsf = dateToTimestamp(fechaFin, horaFin)
+    tsi = int(fechaInicio)
+    tsf = int(fechaFin)
 
     print('fecha inicio de la solicitud',datetime.datetime.utcfromtimestamp(tsi).strftime('%Y-%m-%d %H:%M:%S'))
     print('fecha final',datetime.datetime.utcfromtimestamp(tsf).strftime('%Y-%m-%d %H:%M:%S'))
@@ -49,14 +45,17 @@ def get_data(fechaInicio, horaInicio, fechaFin, horaFin, variable, estacion, fre
         next_url = response['links']['next']
         print('next url')
         while next_url is not None:
+            print('entró while')
             response = requests.get(next_url, headers=headers).json()
             df_list.append(pd.DataFrame(response['data']['timeserie']))
             try:
+                print('en while next url')
                 next_url = response['links']['next']
             except:
+                print('en while fin')
                 next_url = None
     except:
-        print('no hay next url')
+        print('no hay next url, primer except')
 
     df = pd.concat(df_list)
     df['fecha'] = df['timestamp'].apply(lambda x : datetime.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
@@ -64,12 +63,8 @@ def get_data(fechaInicio, horaInicio, fechaFin, horaFin, variable, estacion, fre
     df = df.drop(columns= ['value'])
     return df
 
-def get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia):
-    '''
-    Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
-    hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
-    '''
-    df_list =  [get_data(fechaInicio, horaInicio, fechaFin, horaFin, param, estacion, frecuencia) for param in list_param]
+def get_data_multiparam(fechaInicio, fechaFin, list_param, estacion, frecuencia):
+    df_list =  [get_data(1664911680, 1665516480, param, estacion, frecuencia) for param in list_param]
     df = df_list[0]
     for i in range(len(list_param)):
         df[list_param[i]] = df_list[i][list_param[i]]
@@ -80,5 +75,5 @@ def get_csv(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, fr
     Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
     hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
     '''
-    df= get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia)
+    df= get_data_multiparam(fechaInicio, fechaFin, list_param, estacion, frecuencia)
     df.to_csv('newdata.csv')
