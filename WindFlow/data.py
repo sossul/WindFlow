@@ -7,7 +7,6 @@ def dateToTimestamp(fecha, hora):
     '''
     Recibe '%d-%m-%Y' , '%H:%M' y retorna timestamp
     '''
-
     timestamp = int((time.mktime(time.strptime((f"{fecha} {hora}"), '%d-%m-%Y %H:%M'))))
     timestamp = timestamp - 14400
     return (timestamp)
