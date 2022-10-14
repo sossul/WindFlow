@@ -65,15 +65,20 @@ def get_data(fechaInicio, horaInicio, fechaFin, horaFin, variable, estacion, fre
     return df
 
 def get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia):
+    '''
+    Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
+    hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
+    '''
     df_list =  [get_data(fechaInicio, horaInicio, fechaFin, horaFin, param, estacion, frecuencia) for param in list_param]
     df = df_list[0]
     for i in range(len(list_param)):
         df[list_param[i]] = df_list[i][list_param[i]]
     return df
 
-
-
-list_param = ['WDIR', 'WSPD', 'TEMP', 'EVAP']
-
-df_final = get_data_multiparam('5-10-2022', '00:00', '5-10-2022', '01:00', list_param, 'RT1', ',')
-df_final.head()
+def get_csv(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia):
+    '''
+    Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
+    hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
+    '''
+    df= get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia)
+    df.to_csv('newdata.csv')
