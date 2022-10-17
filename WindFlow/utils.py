@@ -9,31 +9,26 @@ def toCircular(df, wd):
 
     print("toCircular columns created")
 
-def convertToDegrees(sin_prediction,cos_prediction):
+def convertToDegrees(Wd_x,Wd_y):
 	'''
 	Converting sine and cosine back to its circular angle depends on finding which of the the 4 circular quadrants the
 	prediction will fall into. If sin and cos are both GT 0, degrees will fall in 0-90.  If sin>0 cos<0, degrees will fall into 90-180, etc.
 	'''
-	inverseSin=np.degrees(np.arcsin(sin_prediction))
-	inverseCos=np.degrees(np.arccos(cos_prediction))
-	radians_sin=[]
-	radians_cos=[]
-	for a,b,c,d in zip(sin_prediction, cos_prediction, inverseSin, inverseCos):
-		if(a>0 and b>0):
-			radians_sin.append(c)
-			radians_cos.append(d)
-		elif(a>0 and b<0):
-			radians_sin.append(180-c)
-			radians_cos.append(d)
-		elif(a<0 and b<0):
-			radians_sin.append(180-c)
-			radians_cos.append(360-d)
-		elif(a<0 and b>0):
-			radians_sin.append(360+c)
-			radians_cos.append(360-d)
-	radians_sin=np.array(radians_sin)
-	radians_cos=np.array(radians_cos)
-	return radians_sin, radians_cos
+	#quadrant1
+	if Wd_x > 0 and Wd_y > 0:
+		return  np.arctan(Wd_y/Wd_x)*180/np.pi
+	#quadrant2
+	if Wd_x < 0 and Wd_y > 0:
+		return  np.arctan(Wd_y/Wd_x)*180/np.pi + 180
+	#quadrant3
+	if Wd_x < 0 and Wd_y < 0:
+		return  np.arctan(Wd_y/Wd_x)*180/np.pi + 180
+	#quadrant4
+	if Wd_x > 0 and Wd_y < 0:
+		return  np.arctan(Wd_y/Wd_x)*180/np.pi + 360
+
+def v_total(wd_x,wd_y):
+  return np.sqrt(wd_x**2 + wd_y**2)
 
 
 
