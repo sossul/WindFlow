@@ -36,28 +36,83 @@ def convertToDegrees(sin_prediction,cos_prediction):
 	return radians_sin, radians_cos
 
 
-from sklearn.svm import SVR
 
-def train_predict(train_test_data, c_,g_, cos=False):
-	i=0
-	x = []
-	y = []
-	while i <total:
-		if(cos):
+import time
+import datetime
+import pandas as pd
+import requests
 
-			x.append(train_test_data.cos.values[i:recordsBack+i])
-			y.append(train_test_data.cos.values[recordsBack+i])
-		else:
-			x.append(train_test_data.sin.values[i:recordsBack+i])
-			y.append(train_test_data.sin.values[recordsBack+i])
-		i+=1
+def get_data(fechaInicio, fechaFin, variable, estacion, frecuencia):
+    url = f"https://airviro.r9.cl/api/v1/domain/CODELCO/timeserie/{estacion}{frecuencia}M{variable}010/{fechaInicio}/{fechaFin}/"
+    tsi = int(fechaInicio)
+    tsf = int(fechaFin)
 
-	svr_rbf = SVR(kernel='rbf', C=c_ ,gamma=g_)
-	y_rbf = svr_rbf.fit(x[:trainSet], y[:trainSet]).predict(x)
-	y_rbf[y_rbf > 1] = 1
-	y_rbf[y_rbf < -1] = -1
-	mae = mean_absolute_error(y[trainSet:], y_rbf[trainSet:])
-	mse = mean_squared_error(y[trainSet:], y_rbf[trainSet:])
-	rmse = sqrt(mse)
+    print('fecha inicio de la solicitud',datetime.datetime.utcfromtimestamp(tsi).strftime('%Y-%m-%d %H:%M:%S'))
+    print('fecha final',datetime.datetime.utcfromtimestamp(tsf).strftime('%Y-%m-%d %H:%M:%S'))
 
-	return y_rbf[trainSet:], rmse
+    headers = {
+        'Authenticator': 'K1ykGBjKDDWzAnVfYa2Lahs24_4_uyptAeaq83I98gIa73-e5rxw0',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=utf-8',
+        'Cookie': 'SESSID=OFYZH_xi5nyXFYtgDxWn9XUXDZO7bHqF7aXLFDOo3UVROa2LDuqV0',
+    }
+
+    params = {'username':'apicodelco',
+            'password':'codelco.,2022'}
+
+    response = requests.get(url, headers=headers, params=params).json()
+    df = pd.DataFrame(response['data']['timeserie'])
+    df_list = []
+    df_list.append(df)
+    try:
+        next_url = response['links']['next']
+        print('next url')
+        while next_url is not None:
+            print('entró while')
+            response = requests.get(next_url, headers=headers).json()
+            df_list.append(pd.DataFrame(response['data']['timeserie']))
+            try:
+                print('en while next url')
+                next_url = response['links']['next']
+            except:
+                print('en while fin')
+                next_url = None
+    except:
+        print('no hay next url, primer except')
+
+    df = pd.concat(df_list)
+    df['fecha'] = df['timestamp'].apply(lambda x : datetime.datetime.utcfromtimestamp(x).strftime('%Y-%m-%d %H:%M:%S'))
+    df[variable] = df['value']
+    df = df.drop(columns= ['value'])
+    return df
+
+
+def get_data_multiparam(fechaInicio, fechaFin, list_param, estacion, frecuencia):
+    df_list =  [get_data(fechaInicio, fechaFin, param, estacion, frecuencia) for param in list_param]
+    df = df_list[0]
+    for i in range(len(list_param)):
+        df[list_param[i]] = df_list[i][list_param[i]]
+    return df
+
+def dateToTimestamp(fecha, hora):
+    '''
+    Recibe '%d-%m-%Y' , '%H:%M' y retorna timestamp
+    '''
+
+    timestamp = int((time.mktime(time.strptime((f"{fecha} {hora}"), '%Y-%m-%d %H:%M'))))
+    timestamp = timestamp - 14400
+    return (timestamp)
+
+def timestampToDate(timestamp):
+    '''
+    Recibe un int de timestamp y retorna un string asi '%d-%m-%y %H:%M'
+    '''
+    dt_obj = datetime.fromtimestamp(timestamp).strftime('%y-%m-%d %H:%M')
+    print (type(dt_obj))
+    return dt_obj
+
+def get_data_to_predict(fecha, hora,estacion, frecuencia, window, list_param):
+    timestamp_f = dateToTimestamp(fecha, hora)
+    timestamp_i = timestamp_f- window*60
+    df = get_data_multiparam(timestamp_i,timestamp_f, list_param, estacion, frecuencia)
+    df = df.set_index('fecha')
+    return df[list_param]
