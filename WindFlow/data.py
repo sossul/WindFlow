@@ -85,5 +85,5 @@ def get_csv(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, fr
     Recibe fecha inicio como string'%d-%m-%Y', hora inicio como string '%H:%M', fecha final como string'%d-%m-%Y',
     hora final como string '%H:%M', variable a evaluar, estacion y frecuencia de la data (horaria + | diaria * | minutal , | 15min q )
     '''
-    df= get_data_multiparam(fechaInicio, fechaFin, list_param, estacion, frecuencia)
+    df= get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia)
     df.to_csv('newdata.csv')
