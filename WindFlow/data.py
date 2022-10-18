@@ -131,13 +131,8 @@ def get_data_to_predict(fechaInicio, horaInicio ,estacion, frecuencia, window, l
     timestamp_f = dateToTimestamp(fechaInicio, horaInicio)
     timestamp_i = timestamp_f- window*60 - 60
     df = get_data_multiparam_ts(timestamp_i,timestamp_f, list_param, estacion, frecuencia)
-    df = df.set_index('fecha')
-    df = df[0::5]
-    df['wd_x'] = np.cos(df['WDIR']*np.pi/180)*df['WSPD']
-    df['wd_y'] = np.sin(df['WDIR']*np.pi/180)*df['WSPD']
-    df.drop(['WDIR', 'WSPD'], axis=1, inplace= True)
-    df.reset_index(drop=True, inplace= True)
-    return df[['wd_x','wd_y']]
+    df = df[5::5]
+    return df
 
 def get_csv(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia):
     '''
