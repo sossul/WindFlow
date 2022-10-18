@@ -3,6 +3,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import datetime
+import requests
 
 
 
@@ -13,7 +14,7 @@ these places are exposed to microparticle contamination from dynamite blasting a
 
 st.sidebar.markdown("# Main page 🎈")
 
-df= pd.read_csv("data.csv")
+# df= pd.read_csv("data.csv")
 # this slider allows the user to select a number of lines
 # to display in the dataframe
 # the selected value is returned by st.slider
@@ -48,14 +49,18 @@ st_folium(testmap)
 
 d = st.date_input(
     "Fecha:",
-    datetime.date(2019, 7, 6))
+    datetime.date(2022, 1, 4))
 st.write('Fecha:', d)
 
 t = st.time_input('Hora', datetime.time(8, 45))
 st.write('Hora:', t)
 
-
-
+URL = "http://127.0.0.1:8000/predict"
+PARAMS = {'fecha':d,
+          'hora':t}
+r = requests.get(url = URL, params = PARAMS)
+data = r.json()
+st.write('predict:', data)
 ###############################################################
 ####################    1ER GRÁFICO    ########################
 ###############################################################
