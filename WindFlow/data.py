@@ -134,6 +134,13 @@ def get_data_to_predict(fechaInicio, horaInicio ,estacion, frecuencia, window, l
     df = df[5::5]
     return df
 
+def get_data_to_evaluate(fechaInicio, horaInicio ,estacion, frecuencia, window, list_param):
+    timestamp_i = dateToTimestamp(fechaInicio, horaInicio) - 60
+    timestamp_f = timestamp_i+ window*60 + 60
+    df = get_data_multiparam_ts(timestamp_i,timestamp_f, list_param, estacion, frecuencia)
+    df = df[5::5]
+    return df
+
 def get_csv(fechaInicio, horaInicio, fechaFin, horaFin, list_param, estacion, frecuencia):
     '''
     Recibe fecha inicio como string'%Y-%m-%d', hora inicio como string '%H:%M:%S', fecha final como string'%Y-%m-%d',
