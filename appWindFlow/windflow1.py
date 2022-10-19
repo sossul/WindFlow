@@ -58,14 +58,15 @@ st.write('Fecha:', d)
 t = st.time_input('Hora', datetime.time(8, 45))
 st.write('Hora:', t)
 
-URL = "http://127.0.0.1:8000/predict"
+
+URL = "https://windflow-uiovyej6ca-ew.a.run.app/predict"
 PARAMS = {'fecha':d,
         'hora':t}
 r = requests.get(url = URL, params = PARAMS)
 data = r.json()
 # st.write('predict:', data)
 
-URL = "http://127.0.0.1:8000/evaluate"
+URL = "https://windflow-uiovyej6ca-ew.a.run.app/evaluate"
 PARAMS = {'fecha':d,
         'hora':t}
 r = requests.get(url = URL, params = PARAMS)
