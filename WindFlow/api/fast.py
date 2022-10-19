@@ -2,13 +2,11 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-from data import get_data_to_predict, get_data_to_evaluate
-from ml_logic.encoders import wind_transform
+from WindFlow.data import get_data_to_predict, get_data_to_evaluate
+from WindFlow.ml_logic.encoders import wind_transform
 from keras.models import load_model
 import numpy as np
-import tensorflow as tf
-from predict import pred
-from utils import convertToDegrees, v_total
+from WindFlow.utils import convertToDegrees, v_total
 
 # from taxifare.ml_logic.preprocessor import preprocess_features
 
@@ -88,4 +86,4 @@ def evaluate(fecha, hora):
 
 @app.get("/")
 def root():
-    return {'greeting': 'Hello'}
+    return {'greeting': 'Hello, my name is WindFlow :)'}
