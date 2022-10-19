@@ -45,7 +45,10 @@ folium.Circle(coordinatesGAA, radius=300 ).add_to(testmap)
 
 st_folium(testmap)
 
-
+option = st.selectbox(
+    'Choose the station to predict the wind direction and speed',
+    ('RT1', 'SI0', 'SI4'))
+st.write('You selected:', option)
 
 d = st.date_input(
     "Fecha:",
@@ -57,43 +60,53 @@ st.write('Hora:', t)
 
 URL = "http://127.0.0.1:8000/predict"
 PARAMS = {'fecha':d,
-          'hora':t}
+        'hora':t}
 r = requests.get(url = URL, params = PARAMS)
 data = r.json()
-st.write('predict:', data)
+# st.write('predict:', data)
+
+URL = "http://127.0.0.1:8000/evaluate"
+PARAMS = {'fecha':d,
+        'hora':t}
+r = requests.get(url = URL, params = PARAMS)
+data_true = r.json()
+# st.write('evaluate:', data_true)
 ###############################################################
 ####################    1ER GRÁFICO    ########################
 ###############################################################
 
-import matplotlib.pyplot as plt
-col_wspd = df.WSPD.values.tolist()
-col_wspd_np = np.array(col_wspd)
+df = pd.concat([pd.DataFrame(data), pd.DataFrame(data_true)], axis=1)
+st.dataframe(df)
 
-col_wdir = df.WDIR.values.tolist()
-col_wdir_np = np.array(col_wdir)
+# import matplotlib.pyplot as plt
+# col_wspd = df.WSPD.values.tolist()
+# col_wspd_np = np.array(col_wspd)
 
-col_time = df.fecha.values.tolist()
+# col_wdir = df.WDIR.values.tolist()
+# col_wdir_np = np.array(col_wdir)
 
-n = 10
-wind_speed = col_wspd_np[-10:]
-wind_dir = col_wdir_np[-10:]
-time = col_time[-10:]
-time =[x[10:16] for x in time]
-Y = [0] * n
+# col_time = df.fecha.values.tolist()
 
-U = np.cos(wind_dir) * wind_speed
-V = np.sin(wind_dir) * wind_speed
+# n = 10
+# wind_speed = col_wspd_np[-10:]
+# wind_dir = col_wdir_np[-10:]
+# time = col_time[-10:]
+# time =[x[10:16] for x in time]
+# Y = [0] * n
 
-plt.figure()
-plt.quiver(time, Y, U, V)
+# U = np.cos(wind_dir) * wind_speed
+# V = np.sin(wind_dir) * wind_speed
 
-
-fig, ax = plt.subplots()
-ax.quiver(time, Y, U, V)
-
+# plt.figure()
+# plt.quiver(time, Y, U, V)
 
 
-st.pyplot(fig)
+# fig, ax = plt.subplots()
+# ax.quiver(time, Y, U, V)
+
+
+
+# st.pyplot(fig)
 
 
 ###############################################################
@@ -101,13 +114,18 @@ st.pyplot(fig)
 ###############################################################
 
 
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
-from PIL import Image
-image = Image.open('unknown.png')
+fig = plt.figure(figsize=(10, 4))
+sns.lineplot(data= df[['pred_SPD','true_SPD']])
 
-st.image(image, caption='Current prediction versus historical information')
+st.pyplot(fig)
 
+fig = plt.figure(figsize=(10, 4))
+sns.lineplot(data= df[['pred_DIR','true_DIR']])
 
+st.pyplot(fig)
 
 # and used to select the displayed lines
