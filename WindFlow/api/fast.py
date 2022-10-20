@@ -2,18 +2,16 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+
 from WindFlow.data import get_data_to_predict, get_data_to_evaluate
-from WindFlow.ml_logic.encoders import wind_transform
+from WindFlow.ml_logic.encoders import pred_df, inverse_std
 from keras.models import load_model
 import numpy as np
+import tensorflow as tf
 from WindFlow.utils import convertToDegrees, v_total
 
-# from taxifare.ml_logic.preprocessor import preprocess_features
-
-# from taxifare.ml_logic.registry import load_model
-
 app = FastAPI()
-app.state.model = load_model('model_saved.h5')
+app.state.model = load_model('new_model.h5')
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,65 +21,41 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# http://127.0.0.1:8000/predict?pickup_datetime=2012-10-06 12:10:20&pickup_longitude=40.7614327&pickup_latitude=-73.9798156&dropoff_longitude=40.6513111&dropoff_latitude=-73.8803331&passenger_count=2
 @app.get("/predict")
-
 def predict(fecha, hora):
+    list_param = ['WDIR010', 'WSPD010','STWD010','SWSP010', 'TEMP010','EVAP000','PRES002','RHUM000']
+    df = get_data_to_predict(fecha, hora, 'RT1', ',', 60*24,  list_param)
 
-    df = get_data_to_predict(fecha, hora, 'RT1', ',', 60, ['WSPD','WDIR','TEMP'])
-    x_pred = wind_transform(df)
-    x_pred = x_pred.to_numpy()
-    x_pred = np.expand_dims(x_pred, axis=0)
+    x_pred = pred_df(df)
+
+    df = get_data_to_predict(fecha, hora, 'RT1', ',', 60, ['WSPD','WDIR','TEMP' ])
+
     y_pred = app.state.model.predict(x_pred)
-    list_pred = y_pred[0].tolist()
-    y_test_pred = [[[v_total(x[0],x[1]), convertToDegrees(x[0],x[1])] for x in y ] for y in y_pred]
-    SPD_pred = [item[0] for item in y_test_pred[0]]
-    DIR_pred = [item[1] for item in y_test_pred[0]]
+
+    mean_x, mean_y, std_x, std_y = inverse_std()
+
+    y_test_pred = [[[v_total((x[0]*std_x)+mean_x, (x[1]*std_y)+mean_y),
+                 convertToDegrees((x[0]*std_x)+mean_x,(x[1]*std_y)+mean_y)] for x in y ] for y in y_pred]
+
+
+    SPD_pred = [round(item[0],1) for item in y_test_pred[0]]
+    DIR_pred = [round(item[1],0) for item in y_test_pred[0]]
+
     # return(y_test_pred)
     return {'pred_SPD':SPD_pred,
             'pred_DIR':DIR_pred
             }
 
-@app.get("/evaluate")
 
+@app.get("/evaluate")
 def evaluate(fecha, hora):
 
-    df = get_data_to_evaluate(fecha, hora, 'RT1', ',', 60, ['WSPD','WDIR','TEMP'])
+    df = get_data_to_evaluate(fecha, hora, 'RT1', ',', 60*6, ['WSPD010','WDIR010'])
 
-    return {'true_SPD':list(df['WSPD']),
-            'true_DIR':list(df['WDIR'])
+    return {'date_hour':list(df['fecha']),
+            'true_SPD':list(df['WSPD010']),
+            'true_DIR':list(df['WDIR010'])
             }
-
-# def predict(pickup_datetime: datetime,  # 2013-07-06 17:18:00
-#             pickup_longitude: float,    # -73.950655
-#             pickup_latitude: float,     # 40.783282
-#             dropoff_longitude: float,   # -73.984365
-#             dropoff_latitude: float,    # 40.769802
-#             passenger_count: int):      # 1
-#     """
-#     we use type hinting to indicate the data types expected
-#     for the parameters of the function
-#     FastAPI uses this information in order to hand errors
-#     to the developpers providing incompatible parameters
-#     FastAPI also provides variables of the expected data type to use
-#     without type hinting we need to manually convert
-#     the parameters of the functions which are all received as strings
-#     """
-
-#     X_pred =pd.DataFrame(dict(
-#             key=["2013-07-06 17:18:00"],  # useless but the pipeline requires it
-#             pickup_datetime=pickup_datetime,
-#             pickup_longitude=pickup_longitude,
-#             pickup_latitude=pickup_latitude,
-#             dropoff_longitude=dropoff_longitude,
-#             dropoff_latitude=dropoff_latitude,
-#             passenger_count=passenger_count))
-
-#     X_processed = preprocess_features(X_pred)
-
-#     y_pred = app.state.model.predict(X_processed)
-
-#     return {'fare':float(y_pred)}
 
 
 @app.get("/")
