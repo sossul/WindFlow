@@ -2,12 +2,13 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
-from data import get_data_to_predict, get_data_to_evaluate
-from ml_logic.encoders import pred_df, inverse_std
+
+from WindFlow.data import get_data_to_predict, get_data_to_evaluate
+from WindFlow.ml_logic.encoders import pred_df, inverse_std
 from keras.models import load_model
 import numpy as np
 import tensorflow as tf
-from utils import convertToDegrees, v_total
+from WindFlow.utils import convertToDegrees, v_total
 
 app = FastAPI()
 app.state.model = load_model('new_model.h5')
@@ -59,4 +60,4 @@ def evaluate(fecha, hora):
 
 @app.get("/")
 def root():
-    return {'greeting': 'Hello'}
+    return {'greeting': 'Hello, my name is WindFlow :)'}
