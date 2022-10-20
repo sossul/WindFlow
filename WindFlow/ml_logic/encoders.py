@@ -39,7 +39,7 @@ def wind_transform2(df):
 
 
 def pred_df(df):
-    standarization_values = pd.read_csv('data/standarization_values.csv', index_col = 0)
+    standarization_values = pd.read_csv('standarization_values.csv', index_col = 0)
     train_mean = standarization_values['mean']
     train_std = standarization_values['std']
 
@@ -63,7 +63,7 @@ def pred_df(df):
 
 
 def inverse_std():
-    standarization_values = pd.read_csv('data/standarization_values.csv', index_col = 0)
+    standarization_values = pd.read_csv('standarization_values.csv', index_col = 0)
 
     norm_x = standarization_values.loc['wd_x']
     norm_y = standarization_values.loc['wd_y']

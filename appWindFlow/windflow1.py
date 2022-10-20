@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import requests
-from visions import Time
+#from visions import Time
 import seaborn as sns
 import matplotlib.pyplot as plt
 import math
@@ -59,26 +59,31 @@ st.write('Hora:', t)
 
 
 URL_pred = "http://127.0.0.1:8000/predict"
-
-PARAMS = {'fecha':d,
-        'hora':t}
-#data = r_pred.json()
-# st.write('predict:', data)
-
 URL_true = "http://127.0.0.1:8000/evaluate"
-PARAMS = {'fecha':d,
-        'hora':t}
+
+PARAMS = {'fecha':d, 'hora':t}
 
 
-def click():
-    r_pred = requests.get(url = URL_pred, params = PARAMS)
-    r_true = requests.get(url = URL_true, params = PARAMS)
+# def click():
+#     r_pred = requests.get(url = URL_pred, params = PARAMS)
+#     r_true = requests.get(url = URL_true, params = PARAMS)
 
-    st.session_state.data_pred = r_pred.json()
-    st.session_state.data_true = r_true.json()
+#     st.session_state.data_pred = r_pred.json()
+#     st.session_state.data_true = r_true.json()
 
-button = st.button("Predict", on_click = click)
+# button = st.button("Predict", on_click = click)
 
+if 'data_pred' not in st.session_state:
+    print('DATA NULL')
+
+
+
+
+r_pred = requests.get(url = URL_pred, params = PARAMS)
+r_true = requests.get(url = URL_true, params = PARAMS)
+
+st.session_state.data_pred = r_pred.json()
+st.session_state.data_true = r_true.json()
 
 if 'data_pred' in st.session_state:
     print('ENTRO AL IF ENTRO AL IF')
