@@ -82,7 +82,9 @@ def get_data_multiparam(fechaInicio, horaInicio, fechaFin, horaFin, list_param, 
     return df
 
 def get_data_ts(fechaInicio, fechaFin, variable, estacion, frecuencia):
-    url = f"https://airviro.r9.cl/api/v1/domain/CODELCO/timeserie/{estacion}{frecuencia}M{variable}010/{fechaInicio}/{fechaFin}/"
+    #url = f"https://airviro.r9.cl/api/v1/domain/CODELCO/timeserie/{estacion}{frecuencia}M{variable}010/{fechaInicio}/{fechaFin}/"
+    url = f"https://airviro.r9.cl/api/v1/domain/CODELCO/timeserie/{estacion}{frecuencia}M{variable}/{fechaInicio}/{fechaFin}/"
+
     tsi = int(fechaInicio)
     tsf = int(fechaFin)
     print('fecha inicio de la solicitud',datetime.datetime.utcfromtimestamp(tsi).strftime('%Y-%m-%d %H:%M:%S'))
