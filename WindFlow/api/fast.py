@@ -51,7 +51,8 @@ def evaluate(fecha, hora):
 
     df = get_data_to_evaluate(fecha, hora, 'RT1', ',', 60*6, ['WSPD010','WDIR010'])
 
-    return {'true_SPD':list(df['WSPD010']),
+    return {'date_hour':list(df['fecha']),
+            'true_SPD':list(df['WSPD010']),
             'true_DIR':list(df['WDIR010'])
             }
 
