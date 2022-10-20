@@ -5,8 +5,9 @@ import pandas as pd
 import datetime
 import requests
 from visions import Time
-
-
+import seaborn as sns
+import matplotlib.pyplot as plt
+import math
 
 st.markdown("""# WindFlow
 ## It is an app that predicts wind speed and direction for a given location.
@@ -56,102 +57,125 @@ st.write('Hora:', t)
 
 #URL = "https://windflow-uiovyej6ca-ew.a.run.app/predict"
 
-URL = "http://127.0.0.1:8000/predict"
+
+URL_pred = "http://127.0.0.1:8000/predict"
 
 PARAMS = {'fecha':d,
         'hora':t}
-r = requests.get(url = URL, params = PARAMS)
-data = r.json()
+#data = r_pred.json()
 # st.write('predict:', data)
 
-URL = "http://127.0.0.1:8000/evaluate"
+URL_true = "http://127.0.0.1:8000/evaluate"
 PARAMS = {'fecha':d,
         'hora':t}
-r = requests.get(url = URL, params = PARAMS)
-data_true = r.json()
-
-df = pd.concat([pd.DataFrame(data_true), pd.DataFrame(data)], axis=1)
-# st.dataframe(df)
-df_7 = df[0::7]
-
-import numpy as np
-import math
-
-col_wspd = df_7.true_SPD.values.tolist()
-col_wspd_np = np.array(col_wspd)
-
-col_wdir = df_7.true_DIR.values.tolist()
-col_wdir_np = np.array(col_wdir)
-
-col_time = df_7.date_hour.values.tolist()
-
-col_wspd_pred = df_7.pred_SPD.values.tolist()
-col_wspd_pred_np = np.array(col_wspd_pred)
-
-col_wdir_pred = df_7.pred_DIR.values.tolist()
-col_wdir_pred_np = np.array(col_wdir_pred)
-
-col_time = df_7.date_hour.values.tolist()
-
-import matplotlib.pyplot as plt
-
-n = 11
-wind_speed = col_wspd_np
-wind_dir = col_wdir_np
-time = col_time
-time =[x[10:16] for x in time]
-Y = [0] * n
-
-U = np.cos(wind_dir/180. * math.pi) * wind_speed
-V = np.sin(wind_dir/180. * math.pi) * wind_speed
-
-wind_speed_pred = col_wspd_pred_np
-wind_dir_pred = col_wdir_pred_np
-time = col_time
-time =[x[10:16] for x in time]
-Y_PRED = [0] * n
 
 
-U_PRED = np.cos(wind_dir_pred/180. * math.pi) * wind_speed_pred
-V_PRED = np.sin(wind_dir_pred/180. * math.pi) * wind_speed_pred
+def click():
+    r_pred = requests.get(url = URL_pred, params = PARAMS)
+    r_true = requests.get(url = URL_true, params = PARAMS)
+
+    st.session_state.data_pred = r_pred.json()
+    st.session_state.data_true = r_true.json()
+
+button = st.button("Predict", on_click = click)
 
 
-plt.style.use('dark_background')
-fig, ax = plt.subplots()
-quiver1 =ax.quiver(time, Y, U, V, color='b')
-quiver2 =ax.quiver(time, Y_PRED, U_PRED, V_PRED, color='r', alpha=0.6)
-ax.legend([quiver1, quiver2], ['TRUE', 'PREDICTION'])
-title = df.iloc[0]['date_hour'][:10]
-ax.title.set_text(title)
-st.pyplot(fig)
+if 'data_pred' in st.session_state:
+    print('ENTRO AL IF ENTRO AL IF')
+    data_pred = st.session_state.data_pred
+    data_true = st.session_state.data_true
+    df = pd.concat([pd.DataFrame(data_true), pd.DataFrame(data_pred)], axis=1)
 
-import seaborn as sns
-import matplotlib.pyplot as plt
 
-plt.style.use('dark_background')
-fig = plt.figure(figsize=(10, 4))
 
-df['hour'] = df['date_hour'].str[-8:].str[:5]
-df_2 = df[0::2]
+    #Grafico1
+    df_7 = df[0::10]
 
-sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION')
-sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE')
-plt.xticks(rotation=45)
+    col_wspd = df_7.true_SPD.values.tolist()
+    col_wspd_np = np.array(col_wspd)
 
-font1 = {'family':'serif','color':'blue','size':20}
-font2 = {'family':'serif','color':'darkred','size':15}
+    col_wdir = df_7.true_DIR.values.tolist()
+    col_wdir_np = np.array(col_wdir)
 
-plt.title("SPEED PREDICTION 6 HOURS", fontdict = font1)
-plt.xlabel("TIME", fontdict = font2)
-plt.ylabel("SPEED IN M/S", fontdict = font2)
-st.pyplot(fig)
+    col_time = df_7.date_hour.values.tolist()
 
-fig = plt.figure(figsize=(10, 4))
-sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION')
-sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE')
-plt.xticks(rotation=45)
+    col_wspd_pred = df_7.pred_SPD.values.tolist()
+    col_wspd_pred_np = np.array(col_wspd_pred)
 
-plt.title("DIRECTION PREDICTION 6 HOURS", fontdict = font1)
-plt.xlabel("TIME", fontdict = font2)
-plt.ylabel("DIRECTION IN DEGREES", fontdict = font2)
-st.pyplot(fig)
+    col_wdir_pred = df_7.pred_DIR.values.tolist()
+    col_wdir_pred_np = np.array(col_wdir_pred)
+
+    col_time = df_7.date_hour.values.tolist()
+
+
+    n = 8
+    wind_speed = col_wspd_np
+    wind_dir = col_wdir_np
+    time = col_time
+    time =[x[10:16] for x in time]
+    Y = [0] * n
+
+    U = np.cos(wind_dir/180. * math.pi) * wind_speed
+    V = np.sin(wind_dir/180. * math.pi) * wind_speed
+
+    wind_speed_pred = col_wspd_pred_np
+    wind_dir_pred = col_wdir_pred_np
+    time = col_time
+    time =[x[10:16] for x in time]
+    Y_PRED = [0] * n
+
+
+    U_PRED = np.cos(wind_dir_pred/180. * math.pi) * wind_speed_pred
+    V_PRED = np.sin(wind_dir_pred/180. * math.pi) * wind_speed_pred
+
+
+    plt.style.use('dark_background')
+    fig1, ax = plt.subplots()
+    quiver1 =ax.quiver(time, Y, U, V, color='b')
+    quiver2 =ax.quiver(time, Y_PRED, U_PRED, V_PRED, color='r', alpha=0.6)
+    ax.legend([quiver1, quiver2], ['TRUE', 'PREDICTION'])
+    title = df.iloc[0]['date_hour'][:10]
+    ax.title.set_text(title)
+    st.pyplot(fig1)
+
+
+
+    ### Grafico 2
+
+    plt.style.use('dark_background')
+    fig2 = plt.figure(figsize=(10, 4))
+
+    df['hour'] = df['date_hour'].str[-8:].str[:5]
+    df_2 = df[0::2]
+
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION')
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE')
+    plt.xticks(rotation=45)
+
+    font1 = {'family':'serif','color':'blue','size':20}
+    font2 = {'family':'serif','color':'darkred','size':15}
+
+    plt.title("SPEED PREDICTION 6 HOURS", fontdict = font1)
+    plt.xlabel("TIME", fontdict = font2)
+    plt.ylabel("SPEED IN M/S", fontdict = font2)
+    st.pyplot(fig2)
+
+
+    ###Grafico3
+    fig3 = plt.figure(figsize=(10, 4))
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION')
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE')
+    plt.xticks(rotation=45)
+
+    plt.title("DIRECTION PREDICTION 6 HOURS", fontdict = font1)
+    plt.xlabel("TIME", fontdict = font2)
+    plt.ylabel("DIRECTION IN DEGREES", fontdict = font2)
+    st.pyplot(fig3)
+
+
+
+
+    # def show_graphs():
+    #     st.pyplot(fig1)
+    #     st.pyplot(fig2)
+    #     st.pyplot(fig3)
