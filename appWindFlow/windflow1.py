@@ -48,10 +48,10 @@ st.write('You selected:', option)
 
 d = st.date_input(
     "Fecha:",
-    datetime.date(2022, 1, 4))
+    datetime.date(2021, 12, 15))
 st.write('Fecha:', d)
 
-t = st.time_input('Hora', datetime.time(8, 45))
+t = st.time_input('Hora', datetime.time(19, 00))
 st.write('Hora:', t)
 
 
@@ -64,26 +64,26 @@ URL_true = "http://127.0.0.1:8000/evaluate"
 PARAMS = {'fecha':d, 'hora':t}
 
 
-# def click():
-#     r_pred = requests.get(url = URL_pred, params = PARAMS)
-#     r_true = requests.get(url = URL_true, params = PARAMS)
+def click():
+    r_pred = requests.get(url = URL_pred, params = PARAMS)
+    r_true = requests.get(url = URL_true, params = PARAMS)
 
-#     st.session_state.data_pred = r_pred.json()
-#     st.session_state.data_true = r_true.json()
+    st.session_state.data_pred = r_pred.json()
+    st.session_state.data_true = r_true.json()
 
-# button = st.button("Predict", on_click = click)
+button = st.button("Predict", on_click = click)
 
-if 'data_pred' not in st.session_state:
-    print('DATA NULL')
-
-
+# if 'data_pred' not in st.session_state:
+#     print('DATA NULL')
 
 
-r_pred = requests.get(url = URL_pred, params = PARAMS)
-r_true = requests.get(url = URL_true, params = PARAMS)
 
-st.session_state.data_pred = r_pred.json()
-st.session_state.data_true = r_true.json()
+
+# r_pred = requests.get(url = URL_pred, params = PARAMS)
+# r_true = requests.get(url = URL_true, params = PARAMS)
+
+# st.session_state.data_pred = r_pred.json()
+# st.session_state.data_true = r_true.json()
 
 if 'data_pred' in st.session_state:
     print('ENTRO AL IF ENTRO AL IF')
@@ -139,6 +139,7 @@ if 'data_pred' in st.session_state:
     quiver1 =ax.quiver(time, Y, U, V, color='b')
     quiver2 =ax.quiver(time, Y_PRED, U_PRED, V_PRED, color='r', alpha=0.6)
     ax.legend([quiver1, quiver2], ['TRUE', 'PREDICTION'])
+    ax.get_yaxis().set_ticks([])
     title = df.iloc[0]['date_hour'][:10]
     ax.title.set_text(title)
     st.pyplot(fig1)
@@ -151,11 +152,12 @@ if 'data_pred' in st.session_state:
     fig2 = plt.figure(figsize=(10, 4))
 
     df['hour'] = df['date_hour'].str[-8:].str[:5]
-    df_2 = df[0::2]
+    df_2 = df[0::1]
 
-    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION')
-    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE')
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION', color='red', linewidth=2.5)
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE', color='blue', linewidth=2.5)
     plt.xticks(rotation=45)
+    plt.xticks(df_2['hour'][::4])
 
     font1 = {'family':'serif','color':'blue','size':20}
     font2 = {'family':'serif','color':'darkred','size':15}
@@ -168,9 +170,10 @@ if 'data_pred' in st.session_state:
 
     ###Grafico3
     fig3 = plt.figure(figsize=(10, 4))
-    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION')
-    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE')
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION', color='red', linewidth=2.5)
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE', color='blue', linewidth=2.5)
     plt.xticks(rotation=45)
+    plt.xticks(df_2['hour'][::4])
 
     plt.title("DIRECTION PREDICTION 6 HOURS", fontdict = font1)
     plt.xlabel("TIME", fontdict = font2)
