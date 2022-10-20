@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import requests
+from visions import Time
 
 
 
@@ -14,12 +15,6 @@ these places are exposed to microparticle contamination from dynamite blasting a
 
 st.sidebar.markdown("# Main page 🎈")
 
-# df= pd.read_csv("data.csv")
-# this slider allows the user to select a number of lines
-# to display in the dataframe
-# the selected value is returned by st.slider
-
-#line_count = st.slider('Select a line count', 1, 10, 3)
 
 st.caption('On the map below you can see (in the blue dots) the locations of the copper mine works. Near and to the south of these is the city of Calama, which has a population of 180,283. Currently it presents many pollution problems linked to the work of the mine, with the following work we seek to reduce the environmental impact by knowing the best moments of operation.')
 
@@ -33,14 +28,14 @@ from numpy import mean
 
 coordinatesSI4 = [-22.3049, -68.8986] # estacion SI4
 coordinatesSIO = [-22.4053, -68.9108] # estacion SIO
-coordinatesGAA = [-23.4188, -68.7853] # estacion GAA
+coordinatesGAA = [-22.3588, -68.8899] # estacion GAA
 
-testmap = folium.Map(location=[-22.82, -68.86489999999999], zoom_start=9)
+testmap = folium.Map(location=[-22.37, -68.90], zoom_start=11.65)
 folium.Marker(coordinatesSI4, tooltip='SI4').add_to(testmap)
 folium.Circle(coordinatesSI4, radius=300 ).add_to(testmap)
 folium.Marker(coordinatesSIO, tooltip='SIO').add_to(testmap)
 folium.Circle(coordinatesSIO, radius=300 ).add_to(testmap)
-folium.Marker(coordinatesGAA, tooltip='GAA').add_to(testmap)
+folium.Marker(coordinatesGAA, tooltip='RT1').add_to(testmap)
 folium.Circle(coordinatesGAA, radius=300 ).add_to(testmap)
 
 st_folium(testmap)
@@ -74,62 +69,88 @@ PARAMS = {'fecha':d,
         'hora':t}
 r = requests.get(url = URL, params = PARAMS)
 data_true = r.json()
-# st.write('evaluate:', data_true)
-###############################################################
-####################    1ER GRÁFICO    ########################
-###############################################################
 
-df = pd.concat([pd.DataFrame(data), pd.DataFrame(data_true)], axis=1)
-st.dataframe(df)
+df = pd.concat([pd.DataFrame(data_true), pd.DataFrame(data)], axis=1)
+# st.dataframe(df)
 
-# import matplotlib.pyplot as plt
-# col_wspd = df.WSPD.values.tolist()
-# col_wspd_np = np.array(col_wspd)
+import numpy as np
+import math
 
-# col_wdir = df.WDIR.values.tolist()
-# col_wdir_np = np.array(col_wdir)
+col_wspd = df.true_SPD.values.tolist()
+col_wspd_np = np.array(col_wspd)
 
-# col_time = df.fecha.values.tolist()
+col_wdir = df.true_DIR.values.tolist()
+col_wdir_np = np.array(col_wdir)
 
-# n = 10
-# wind_speed = col_wspd_np[-10:]
-# wind_dir = col_wdir_np[-10:]
-# time = col_time[-10:]
-# time =[x[10:16] for x in time]
-# Y = [0] * n
+col_time = df.date_hour.values.tolist()
 
-# U = np.cos(wind_dir) * wind_speed
-# V = np.sin(wind_dir) * wind_speed
+col_wspd_pred = df.pred_SPD.values.tolist()
+col_wspd_pred_np = np.array(col_wspd_pred)
 
-# plt.figure()
-# plt.quiver(time, Y, U, V)
+col_wdir_pred = df.pred_DIR.values.tolist()
+col_wdir_pred_np = np.array(col_wdir_pred)
+
+col_time = df.date_hour.values.tolist()
+
+import matplotlib.pyplot as plt
+
+n = 10
+wind_speed = col_wspd_np[-10:]
+wind_dir = col_wdir_np[-10:]
+time = col_time[-10:]
+time =[x[10:16] for x in time]
+Y = [0] * n
+
+U = np.cos(wind_dir/180. * math.pi) * wind_speed
+V = np.sin(wind_dir/180. * math.pi) * wind_speed
+
+wind_speed_pred = col_wspd_pred_np[-10:]
+wind_dir_pred = col_wdir_pred_np[-10:]
+time = col_time[-10:]
+time =[x[10:16] for x in time]
+Y_PRED = [0] * n
 
 
-# fig, ax = plt.subplots()
-# ax.quiver(time, Y, U, V)
+U_PRED = np.cos(wind_dir/180. * math.pi) * wind_speed_pred
+V_PRED = np.sin(wind_dir/180. * math.pi) * wind_speed_pred
 
 
-
-# st.pyplot(fig)
-
-
-###############################################################
-######################    PREDICCIÓN    #######################
-###############################################################
-
+plt.style.use('dark_background')
+fig, ax = plt.subplots()
+quiver1 =ax.quiver(time, Y, U, V, color='b')
+quiver2 =ax.quiver(time, Y_PRED, U_PRED, V_PRED, color='r', alpha=0.6)
+ax.legend([quiver1, quiver2], ['TRUE', 'PREDICTION'])
+title = df.iloc[0]['date_hour'][:10]
+ax.title.set_text(title)
+st.pyplot(fig)
 
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+plt.style.use('dark_background')
+fig = plt.figure(figsize=(20, 8))
 
-fig = plt.figure(figsize=(10, 4))
-sns.lineplot(data= df[['pred_SPD','true_SPD']])
+df['hour'] = df['date_hour'].str[-8:].str[:5]
+df_2 = df[0::2]
 
+sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION')
+sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE')
+plt.xticks(rotation=45)
+
+font1 = {'family':'serif','color':'blue','size':20}
+font2 = {'family':'serif','color':'darkred','size':15}
+
+plt.title("SPEED PREDICTION 6 HOURS", fontdict = font1)
+plt.xlabel("TIME", fontdict = font2)
+plt.ylabel("SPEED IN M/S", fontdict = font2)
 st.pyplot(fig)
 
-fig = plt.figure(figsize=(10, 4))
-sns.lineplot(data= df[['pred_DIR','true_DIR']])
+fig = plt.figure(figsize=(20, 8))
+sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION')
+sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE')
+plt.xticks(rotation=45)
 
+plt.title("DIRECTION PREDICTION 6 HOURS", fontdict = font1)
+plt.xlabel("TIME", fontdict = font2)
+plt.ylabel("DIRECTION IN DEGREES", fontdict = font2)
 st.pyplot(fig)
-
-# and used to select the displayed lines
