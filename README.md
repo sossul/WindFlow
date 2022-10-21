@@ -18,7 +18,7 @@ You can view the Demo in the following link:
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)]([https://windflow.herokuapp.com/](https://windflow.herokuapp.com/WindFlowApp))
 - [Youtube Demo Day](https://www.youtube.com/watch?v=HZyLS1le0jQ)
-- [Slides]((https://www.canva.com/design/DAFPpteOAt4/fcP2YAVPXLMD-vLufgjpDA/view?    utm_content=DAFPpteOAt4&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink))
+- [Slides](https://www.canva.com/design/DAFPpteOAt4/fcP2YAVPXLMD-vLufgjpDA/view?    utm_content=DAFPpteOAt4&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink)
 
 
 
