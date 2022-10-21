@@ -1,13 +1,121 @@
 import streamlit as st
-
+import os
 import numpy as np
 import pandas as pd
 import datetime
 import requests
-from visions import Time
+#from visions import Time
 import seaborn as sns
 import matplotlib.pyplot as plt
 import math
+from PIL import Image
+import streamlit as st
+
+
+
+# def add_bg_from_url():
+#     st.markdown(
+#          f"""
+#          <style>
+#          .stApp {{
+#              background-image: url("https://s3-us-west-2.amazonaws.com/enterreno-production/moments/photos/000/006/735/original/mina-de-chuquicamata-en-1950.jpg");
+#              background-attachment: fixed;
+#              background-size: cover
+#          }}
+#          </style>
+#          """,
+#          unsafe_allow_html=True
+#      )
+
+# add_bg_from_url()
+
+# st.set_page_config(layout="wide")
+# video_html = """
+# 		<style>
+
+# 		#myVideo {
+# 		  position: fixed;
+# 		  right: 0;
+# 		  bottom: 0;
+# 		  min-width: 100%;
+# 		  min-height: 100%;
+# 		}
+
+# 		.content {
+# 		  position: fixed;
+# 		  bottom: 0;
+# 		  background: rgba(0, 0, 0, 0.5);
+# 		  color: #f1f1f1;
+# 		  width: 100%;
+# 		  padding: 20px;
+# 		}
+
+# 		</style>
+# 		<video autoplay muted loop id="myVideo">
+# 		  <source src="https://www.youtube.com/watch?v=wAEi9s9bEpY")>
+# 		  Your browser does not support HTML5 video.
+# 		</video>
+#         """
+
+# st.markdown(video_html, unsafe_allow_html=True)
+# st.title('Video page')
+
+
+###########
+def add_logo():
+    st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: url(https://i.ibb.co/sHy0KCY/Foto-Jet-9.png);
+                background-repeat: no-repeat;
+                padding-top: 150px;
+                background-position: 0px 15px;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "WindFlow 1.0.2";
+                margin-left: 20px;
+                margin-top: 20px;
+                font-size: 15px;
+                position: relative;
+                top: 100px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+#####
+add_logo()
+
+
+
+# from PIL import Image
+# import streamlit as st
+
+# You can always call this function where ever you want
+
+# def add_logo(logo_path, width, height):
+#     """Read and return a resized logo"""
+#     logo = Image.open(logo_path)
+#     modified_logo = logo.resize((width, height))
+#     return modified_logo
+
+# #my_logo = add_logo(logo_path="jaz_icono2.png", width=50, height=50)
+# #st.sidebar.image(my_logo)
+
+# # OR
+
+# st.sidebar.image(add_logo(logo_path="jaz_icono2.png", width=50, height=50))
+
+####
+
+
+
+
+###
+
+
+
 
 st.markdown("""# WindFlow
 ## It is an app that predicts wind speed and direction for a given location.
@@ -48,26 +156,17 @@ st.write('You selected:', option)
 
 d = st.date_input(
     "Fecha:",
-    datetime.date(2022, 1, 4))
+    datetime.date(2021, 12, 15))
 st.write('Fecha:', d)
 
-t = st.time_input('Hora', datetime.time(8, 45))
+t = st.time_input('Hora', datetime.time(19, 00))
 st.write('Hora:', t)
 
 
-#URL = "https://windflow-uiovyej6ca-ew.a.run.app/predict"
+URL_pred = "https://windflow-uiovyej6ca-ew.a.run.app/predict"
+URL_true = "https://windflow-uiovyej6ca-ew.a.run.app/evaluate"
 
-
-URL_pred = "http://127.0.0.1:8000/predict"
-
-PARAMS = {'fecha':d,
-        'hora':t}
-#data = r_pred.json()
-# st.write('predict:', data)
-
-URL_true = "http://127.0.0.1:8000/evaluate"
-PARAMS = {'fecha':d,
-        'hora':t}
+PARAMS = {'fecha':d, 'hora':t}
 
 
 def click():
@@ -79,6 +178,17 @@ def click():
 
 button = st.button("Predict", on_click = click)
 
+# if 'data_pred' not in st.session_state:
+#     print('DATA NULL')
+
+
+
+
+# r_pred = requests.get(url = URL_pred, params = PARAMS)
+# r_true = requests.get(url = URL_true, params = PARAMS)
+
+# st.session_state.data_pred = r_pred.json()
+# st.session_state.data_true = r_true.json()
 
 if 'data_pred' in st.session_state:
     print('ENTRO AL IF ENTRO AL IF')
@@ -134,6 +244,7 @@ if 'data_pred' in st.session_state:
     quiver1 =ax.quiver(time, Y, U, V, color='b')
     quiver2 =ax.quiver(time, Y_PRED, U_PRED, V_PRED, color='r', alpha=0.6)
     ax.legend([quiver1, quiver2], ['TRUE', 'PREDICTION'])
+    ax.get_yaxis().set_ticks([])
     title = df.iloc[0]['date_hour'][:10]
     ax.title.set_text(title)
     st.pyplot(fig1)
@@ -146,11 +257,12 @@ if 'data_pred' in st.session_state:
     fig2 = plt.figure(figsize=(10, 4))
 
     df['hour'] = df['date_hour'].str[-8:].str[:5]
-    df_2 = df[0::2]
+    df_2 = df[0::1]
 
-    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION')
-    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE')
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_SPD'], label='PREDICTION', color='red', linewidth=2.5)
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_SPD'],label='TRUE', color='blue', linewidth=2.5)
     plt.xticks(rotation=45)
+    plt.xticks(df_2['hour'][::4])
 
     font1 = {'family':'serif','color':'blue','size':20}
     font2 = {'family':'serif','color':'darkred','size':15}
@@ -163,9 +275,10 @@ if 'data_pred' in st.session_state:
 
     ###Grafico3
     fig3 = plt.figure(figsize=(10, 4))
-    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION')
-    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE')
+    sns.lineplot(data= df_2, x=df_2['hour'] ,y= df_2['pred_DIR'],label='PREDICTION', color='red', linewidth=2.5)
+    sns.lineplot(data= df_2, x=df_2['hour'],y= df_2['true_DIR'],label='TRUE', color='blue', linewidth=2.5)
     plt.xticks(rotation=45)
+    plt.xticks(df_2['hour'][::4])
 
     plt.title("DIRECTION PREDICTION 6 HOURS", fontdict = font1)
     plt.xlabel("TIME", fontdict = font2)

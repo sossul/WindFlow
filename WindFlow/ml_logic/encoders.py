@@ -40,6 +40,7 @@ def wind_transform2(df):
 
 def pred_df(df):
     standarization_values = pd.read_csv('WindFlow/data/standarization_values.csv', index_col = 0)
+
     train_mean = standarization_values['mean']
     train_std = standarization_values['std']
 
