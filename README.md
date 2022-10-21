@@ -16,7 +16,7 @@ It is an application that helps mining companies to schedule the best time to op
 
 You can view the Demo in the following link:
 
-- [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://windflow.herokuapp.com/WindFlow)
+- [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://windflow.herokuapp.com/)
 - [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/watch?v=HZyLS1le0jQ)
 
 
