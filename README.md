@@ -18,7 +18,7 @@ You can view the Demo in the following link:
 
 - [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://windflow.herokuapp.com/)
 - [![YouTube](https://img.shields.io/badge/YouTube-%23FF0000.svg?style=for-the-badge&logo=YouTube&logoColor=white)](https://www.youtube.com/watch?v=HZyLS1le0jQ)
-
+- [📄Slides](WindFlow.pdf)
 
 ## Authors
 
