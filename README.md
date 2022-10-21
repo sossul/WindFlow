@@ -16,7 +16,10 @@ It is an application that helps mining companies to schedule the best time to op
 
 You can view the Demo in the following link:
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/sebasdq/WindFlow/http://localhost:8502//)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://windflow.herokuapp.com/)
+- [Youtube Demo Day](https://www.youtube.com/watch?v=HZyLS1le0jQ)
+- [Slides]((https://www.canva.com/design/DAFPpteOAt4/fcP2YAVPXLMD-vLufgjpDA/view?utm_content=DAFPpteOAt4&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink))
+
 
 
 ## Authors
@@ -37,3 +40,6 @@ You can view the Demo in the following link:
 ## The model:
 
 - Three models were tested and metrics were evaluated to find the best model (Bidirectional LSTM, Profet, Multivariate LSTM). The model that showed the best performance was the following, Bidirectional LSTM, which was the one used in the app.
+
+
+##
